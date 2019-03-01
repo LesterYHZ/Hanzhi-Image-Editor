@@ -1,1 +1,1 @@
-# Hanzhi-Image-Editor
+# Hanzhi Image Editor
