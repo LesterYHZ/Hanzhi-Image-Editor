@@ -27,6 +27,12 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         Contrast_Spinner        matlab.ui.control.Spinner
         Contrast_Cancel         matlab.ui.control.Button
         Contrast_ReverseButton  matlab.ui.control.StateButton
+        Rotate_Confirm          matlab.ui.control.Button
+        Rotate_Cancel           matlab.ui.control.Button
+        Rotate_BboxButton       matlab.ui.control.StateButton
+        Rotate_MethodDropDown   matlab.ui.control.DropDown
+        Rotate_Spinner          matlab.ui.control.Spinner
+        Rotate_Slider           matlab.ui.control.Slider
     end
 
 % /**
@@ -63,6 +69,12 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
             set(app.Contrast_Confirm,'Visible','off');
             set(app.Contrast_Cancel,'Visible','off');
             set(app.Contrast_ReverseButton,'Visible','off');
+            set(app.Rotate_Slider,'Visible','off');
+            set(app.Rotate_Spinner,'Visible','off');
+            set(app.Rotate_Confirm,'Visible','off');
+            set(app.Rotate_Cancel,'Visible','off');
+            set(app.Rotate_MethodDropDown,'Visible','off');
+            set(app.Rotate_BboxButton,'Visible','off');
             
             set(app.Save,'Enable','off');
             set(app.Tool,'Enable','off');
@@ -105,10 +117,10 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Menu selected function: Zhangzhe
         function ZhangzheMenuSelected(app, ~)
-           %% 下个月的枪毙明天头一个就是你【【滑稽】】
+            %% 下个月的枪毙明天头一个就是你【【滑稽】】
             
             % 读取长者头像
-            img_src=imread('Source\Zemin.bmp');
+            img_src=imread('D:\Matlab Prgm\Hanzhi-Image-Editor\涵之图片处理器beta_app重置版\Source\Zemin.bmp');
             imshow(img_src,'Parent',app.Image_Axes);
             setappdata(app.UIFigure,'img_src',img_src);     % 将图片矩阵保存为app变量
             setappdata(app.UIFigure,'file','Source/Zemin.bmp');
@@ -320,13 +332,15 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Menu selected function: Crop
         function CropMenuSelected(app, ~)
-
+            % 读入图片矩阵
             img_src = getappdata(app.UIFigure,'img_src');
+            imshow(img_src,'Parent',app.Image_Axes);
             
+            % 在新窗口中剪切图片
             img = imcrop(img_src);
             setappdata(app.UIFigure,'img_changed',img);
-            close;
-            imshow(img,'Parent',app.Image_Axes);
+            close;      % 关闭新窗口
+            imshow(img,'Parent',app.Image_Axes);        % 显示剪切后的图片
             
             % 询问是否保留风格更改
             ButtonName = questdlg('Wanna keep the change?',...
@@ -344,6 +358,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Menu selected function: Contrast
         function ContrastMenuSelected(app, ~)
+            % 组件初始化
             set(app.Image_Axes,'Position',[135,1,702,573]);
             set(app.Contrast_Slider,'Visible','on');
             set(app.Contrast_Spinner,'Visible','on');
@@ -357,14 +372,19 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
             set(app.Contrast_ReverseButton,'Text','暗');
             setappdata(app.UIFigure,'ContrastSliderValue',0);
             setappdata(app.UIFigure,'ContrastSpinnerValue',0);
+            
+            img = getappdata(app.UIFigure,'img_src');
+            imshow(img,'Parent',app.Image_Axes);
         end
 
         % Button pushed function: Contrast_Confirm
         function Contrast_ConfirmButtonPushed(app, ~)
+            % 写入图片矩阵
             img = getappdata(app.UIFigure,'img_changed');
             setappdata(app.UIFigure,'img_src',img);
             imshow(img,'Parent',app.Image_Axes);
             
+            % 隐藏组件
             set(app.Contrast_Slider,'Visible','off');
             set(app.Contrast_Spinner,'Visible','off');
             set(app.Contrast_Confirm,'Visible','off');
@@ -375,9 +395,11 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Button pushed function: Contrast_Cancel
         function Contrast_CancelButtonPushed(app, ~)
+            % 显示原始图片矩阵
             img_src = getappdata(app.UIFigure,'img_src');
             imshow(img_src,'Parent',app.Image_Axes);
             
+            % 隐藏组件
             set(app.Contrast_Slider,'Visible','off');
             set(app.Contrast_Spinner,'Visible','off');
             set(app.Contrast_Confirm,'Visible','off');
@@ -388,17 +410,20 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Value changing function: Contrast_Slider
         function Contrast_SliderValueChanging(app, event)
+            % 滑块与微调器数值同步
             Cont = event.Value;
             set(app.Contrast_Spinner,'Value',round(Cont));
+            % 建立UI内变量以多方控制滑块与微调器的数值
             setappdata(app.UIFigure,'ContrastSliderValue',Cont);
             setappdata(app.UIFigure,'ContrastSpinnerValue',Cont);
             
-            if app.Contrast_ReverseButton.Value == 1
+            % 通过ReverseButton数值不同计算并调整对比度
+            if app.Contrast_ReverseButton.Value == 1    % ReverseButton显示“暗”
                 img = getappdata(app.UIFigure,'img_src');
                 img = imadjust(img,[0,Cont/100]);
                 imshow(img,'Parent',app.Image_Axes);
                 setappdata(app.UIFigure,'img_changed',img);
-            else
+            else                                        % ReverseButton显示“亮”
                 img = getappdata(app.UIFigure,'img_src');
                 img = imadjust(img,[Cont/100,1]);
                 imshow(img,'Parent',app.Image_Axes);
@@ -408,17 +433,20 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Value changed function: Contrast_Spinner
         function Contrast_SpinnerValueChanged(app, ~)
+            % 滑块与微调器数值同步
             Cont = app.Contrast_Spinner.Value;
             set(app.Contrast_Slider,'Value',Cont);
+            % 建立UI内变量以多方控制滑块与微调器的数值
             setappdata(app.UIFigure,'ContrastSliderValue',Cont);
             setappdata(app.UIFigure,'ContrastSpinnerValue',Cont);
             
-            if app.Contrast_ReverseButton == 1
+            % 通过ReverseButton数值不同计算并调整对比度
+            if app.Contrast_ReverseButton == 1    % ReverseButton显示“暗”
                 img = getappdata(app.UIFigure,'img_src');
                 img = imadjust(img,[0,Cont/100]);
                 imshow(img,'Parent',app.Image_Axes);
                 setappdata(app.UIFigure,'img_changed',img);
-            else
+            else                                  % ReverseButton显示“亮”
                 img = getappdata(app.UIFigure,'img_src');
                 img = imadjust(img,[Cont/100,1]);
                 imshow(img,'Parent',app.Image_Axes);
@@ -430,6 +458,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         function Contrast_ReverseButtonValueChanged(app, ~)
             value = app.Contrast_ReverseButton.Value;
             
+            % 调整ReverseButton的显示文字
             if value
                 app.Contrast_ReverseButton.Text = '亮';
                 app.Contrast_Slider.Value = getappdata(app.UIFigure,'ContrastSliderValue');
@@ -439,6 +468,133 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
                 app.Contrast_Slider.Value = getappdata(app.UIFigure,'ContrastSliderValue');
                 app.Contrast_Spinner.Value = getappdata(app.UIFigure,'ContrastSpinnerValue');
             end
+        end
+
+        % Value changing function: Rotate_Slider
+        function Rotate_SliderValueChanging(app, event)
+            % 滑块与微调器数值同步
+            Angle = event.Value;
+            set(app.Rotate_Spinner,'Value',Angle);
+            % 建立UI内变量以多方控制滑块与微调器的数值
+            setappdata(app.UIFigure,'RotateSliderValue',Angle);
+            setappdata(app.UIFigure,'RotateSpinnerValue',Angle);
+            
+            % 旋转图片并保存为临时矩阵
+            img = getappdata(app.UIFigure,'img_src');
+            Bbox = getappdata(app.UIFigure,'Bbox');
+            img_changed = imrotate(img,Angle,app.Rotate_MethodDropDown.Value,Bbox);
+            imshow(img_changed,'Parent',app.Image_Axes);
+            setappdata(app.UIFigure,'img_changed',img_changed);
+        end
+
+        % Value changed function: Rotate_Spinner
+        function Rotate_SpinnerValueChanged(app, ~)
+            % 滑块与微调器数值同步
+            Angle = app.Rotate_Spinner.Value;
+            set(app.Rotate_Slider,'Value',Angle);
+            % 建立UI内变量以多方控制滑块与微调器的数值
+            setappdata(app.UIFigure,'RotateSliderValue',Angle);
+            setappdata(app.UIFigure,'RotateSpinnerValue',Angle);
+            
+            % 旋转图片并保存为临时矩阵
+            img = getappdata(app.UIFigure,'img_src');
+            Bbox = getappdata(app.UIFigure,'Bbox');
+            img_changed = imrotate(img,Angle,app.Rotate_MethodDropDown.Value,Bbox);
+            imshow(img_changed,'Parent',app.Image_Axes);
+            setappdata(app.UIFigure,'img_changed',img_changed);
+        end
+
+        % Button pushed function: Rotate_Confirm
+        function Rotate_ConfirmButtonPushed(app, ~)
+            % 写入图片矩阵
+            img = getappdata(app.UIFigure,'img_changed');
+            setappdata(app.UIFigure,'img_src',img);
+            imshow(img,'Parent',app.Image_Axes);
+            
+            % 隐藏组件
+            set(app.Rotate_Slider,'Visible','off');
+            set(app.Rotate_Spinner,'Visible','off');
+            set(app.Rotate_Confirm,'Visible','off');
+            set(app.Rotate_Cancel,'Visible','off');
+            set(app.Rotate_MethodDropDown,'Visible','off');
+            set(app.Rotate_BboxButton,'Visible','off');
+            
+            set(app.Image_Axes,'Position',[1,1,836,573]);
+        end
+
+        % Button pushed function: Rotate_Cancel
+        function Rotate_CancelButtonPushed(app, ~)
+            % 显示原始图片矩阵
+            img_src = getappdata(app.UIFigure,'img_src');
+            imshow(img_src,'Parent',app.Image_Axes);
+            
+            % 隐藏组件
+            set(app.Rotate_Slider,'Visible','off');
+            set(app.Rotate_Spinner,'Visible','off');
+            set(app.Rotate_Confirm,'Visible','off');
+            set(app.Rotate_Cancel,'Visible','off');
+            set(app.Rotate_MethodDropDown,'Visible','off');
+            set(app.Rotate_BboxButton,'Visible','off');
+            
+            set(app.Image_Axes,'Position',[1,1,836,573]);
+        end
+
+        % Value changed function: Rotate_BboxButton
+        function Rotate_BboxButtonValueChanged(app, ~)
+            value = app.Rotate_BboxButton.Value;
+            
+            % 根据value改变BboxButton的显示字符
+            if value        % 若value为1，显示字符为C，Bbox类型为crop
+                set(app.Rotate_BboxButton,'Text','C');
+                setappdata(app.UIFigure,'Bbox', 'crop');
+            else            % 若value为0，显示字符为L，Bbox类型为loose
+                set(app.Rotate_BboxButton,'Text','L');
+                setappdata(app.UIFigure,'Bbox', 'loose');
+            end
+            
+            % 旋转图片并保存为临时矩阵
+            img = getappdata(app.UIFigure,'img_src');
+            Bbox = getappdata(app.UIFigure,'Bbox');
+            img_changed = imrotate(img,app.Rotate_Slider.Value,app.Rotate_MethodDropDown.Value,Bbox);
+            imshow(img_changed,'Parent',app.Image_Axes);
+            setappdata(app.UIFigure,'img_changed',img_changed);
+        end
+
+        % Menu selected function: Rotate
+        function RotateMenuSelected(app, ~)
+            % 初始化组件
+            set(app.Rotate_Slider,'Visible','on');
+            set(app.Rotate_Spinner,'Visible','on');
+            set(app.Rotate_Confirm,'Visible','on');
+            set(app.Rotate_Cancel,'Visible','on');
+            set(app.Rotate_MethodDropDown,'Visible','on');
+            set(app.Rotate_BboxButton,'Visible','on');
+            
+            set(app.Rotate_Slider,'Value',0);
+            set(app.Rotate_Spinner,'Value',0);
+            set(app.Rotate_MethodDropDown,'Value','Nearest');
+            set(app.Rotate_BboxButton,'Text','L');
+            set(app.Rotate_BboxButton,'Value',0);
+            
+            setappdata(app.UIFigure,'Bbox', 'loose');
+            
+            set(app.Image_Axes,'Position',[135,1,702,573]);
+            
+            img = getappdata(app.UIFigure,'img_src');
+            imshow(img,'Parent',app.Image_Axes);
+            
+        end
+
+        % Value changed function: Rotate_MethodDropDown
+        function Rotate_MethodDropDownValueChanged(app, ~)
+            value = app.Rotate_MethodDropDown.Value;
+            
+            % 旋转图片并保存为临时矩阵
+            img = getappdata(app.UIFigure,'img_src');
+            Bbox = getappdata(app.UIFigure,'Bbox');
+            img_changed = imrotate(img,app.Rotate_Slider.Value,value,Bbox);
+            imshow(img_changed,'Parent',app.Image_Axes);
+            setappdata(app.UIFigure,'img_changed',img_changed);
         end
     end
 
@@ -496,7 +652,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
             % Create Rotate
             app.Rotate = uimenu(app.Tool);
-            app.Rotate.Enable = 'off';
+            app.Rotate.MenuSelectedFcn = createCallbackFcn(app, @RotateMenuSelected, true);
             app.Rotate.Text = '旋转';
 
             % Create Enhance
@@ -583,6 +739,44 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
             app.Contrast_ReverseButton.Visible = 'off';
             app.Contrast_ReverseButton.Text = '暗';
             app.Contrast_ReverseButton.Position = [91 516 30 25];
+
+            % Create Rotate_Slider
+            app.Rotate_Slider = uislider(app.UIFigure);
+            app.Rotate_Slider.Limits = [-180 180];
+            app.Rotate_Slider.Orientation = 'vertical';
+            app.Rotate_Slider.ValueChangingFcn = createCallbackFcn(app, @Rotate_SliderValueChanging, true);
+            app.Rotate_Slider.Position = [66 137 3 367];
+
+            % Create Rotate_Spinner
+            app.Rotate_Spinner = uispinner(app.UIFigure);
+            app.Rotate_Spinner.Limits = [-180 180];
+            app.Rotate_Spinner.ValueChangedFcn = createCallbackFcn(app, @Rotate_SpinnerValueChanged, true);
+            app.Rotate_Spinner.Position = [68 517 64 22];
+
+            % Create Rotate_Confirm
+            app.Rotate_Confirm = uibutton(app.UIFigure, 'push');
+            app.Rotate_Confirm.ButtonPushedFcn = createCallbackFcn(app, @Rotate_ConfirmButtonPushed, true);
+            app.Rotate_Confirm.Position = [21 51 100 25];
+            app.Rotate_Confirm.Text = '确定';
+
+            % Create Rotate_Cancel
+            app.Rotate_Cancel = uibutton(app.UIFigure, 'push');
+            app.Rotate_Cancel.ButtonPushedFcn = createCallbackFcn(app, @Rotate_CancelButtonPushed, true);
+            app.Rotate_Cancel.Position = [21 11 100 25];
+            app.Rotate_Cancel.Text = '取消';
+
+            % Create Rotate_MethodDropDown
+            app.Rotate_MethodDropDown = uidropdown(app.UIFigure);
+            app.Rotate_MethodDropDown.Items = {'Nearest', 'Bilinear', 'Bicubic'};
+            app.Rotate_MethodDropDown.ValueChangedFcn = createCallbackFcn(app, @Rotate_MethodDropDownValueChanged, true);
+            app.Rotate_MethodDropDown.Position = [21 91 100 22];
+            app.Rotate_MethodDropDown.Value = 'Nearest';
+
+            % Create Rotate_BboxButton
+            app.Rotate_BboxButton = uibutton(app.UIFigure, 'state');
+            app.Rotate_BboxButton.ValueChangedFcn = createCallbackFcn(app, @Rotate_BboxButtonValueChanged, true);
+            app.Rotate_BboxButton.Text = 'L';
+            app.Rotate_BboxButton.Position = [18.5 517 25 22];
         end
     end
 
