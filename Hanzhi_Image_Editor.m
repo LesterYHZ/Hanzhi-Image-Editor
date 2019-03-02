@@ -23,16 +23,16 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         Zhangzhe                matlab.ui.container.Menu
         Image_Axes              matlab.ui.control.UIAxes
         Contrast_Slider         matlab.ui.control.Slider
-        Contrast_Confirm        matlab.ui.control.Button
         Contrast_Spinner        matlab.ui.control.Spinner
+        Contrast_Confirm        matlab.ui.control.Button
         Contrast_Cancel         matlab.ui.control.Button
         Contrast_ReverseButton  matlab.ui.control.StateButton
+        Rotate_Slider           matlab.ui.control.Slider
+        Rotate_Spinner          matlab.ui.control.Spinner
         Rotate_Confirm          matlab.ui.control.Button
         Rotate_Cancel           matlab.ui.control.Button
-        Rotate_BboxButton       matlab.ui.control.StateButton
         Rotate_MethodDropDown   matlab.ui.control.DropDown
-        Rotate_Spinner          matlab.ui.control.Spinner
-        Rotate_Slider           matlab.ui.control.Slider
+        Rotate_BboxButton       matlab.ui.control.StateButton
     end
 
 % /**
@@ -63,12 +63,15 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
+            % 界面初始化
             set(app.Image_Axes,'Visible','off');
+            
             set(app.Contrast_Slider,'Visible','off');
             set(app.Contrast_Spinner,'Visible','off');
             set(app.Contrast_Confirm,'Visible','off');
             set(app.Contrast_Cancel,'Visible','off');
             set(app.Contrast_ReverseButton,'Visible','off');
+            
             set(app.Rotate_Slider,'Visible','off');
             set(app.Rotate_Spinner,'Visible','off');
             set(app.Rotate_Confirm,'Visible','off');
@@ -85,7 +88,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Open
-        function OpenMenuSelected(app, ~)
+        function OpenMenuSelected(app, event)
             % 打开文件窗口选取文件
             [filename,pathname] = uigetfile(...
                 {'*.bmp;*.jpg;*.png;*.jpeg',...
@@ -116,7 +119,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Zhangzhe
-        function ZhangzheMenuSelected(app, ~)
+        function ZhangzheMenuSelected(app, event)
             %% 下个月的枪毙明天头一个就是你【【滑稽】】
             
             % 读取长者头像
@@ -133,7 +136,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Save
-        function SaveMenuSelected(app, ~)
+        function SaveMenuSelected(app, event)
             % 打开文件保存窗口
             [filename,pathname]=uiputfile(...
                 {'*.bmp','BMP files';...
@@ -156,13 +159,13 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Exit
-        function ExitMenuSelected(~, ~)
+        function ExitMenuSelected(app, event)
             % 关闭窗口
             closereq;
         end
 
         % Menu selected function: Enhance
-        function EnhanceMenuSelected(app, ~)
+        function EnhanceMenuSelected(app, event)
             % 滑稽进度条
             f = waitbar(0,'图片处理中……');
             pause(0.5);
@@ -199,7 +202,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: ASCII
-        function ASCIIMenuSelected(app, ~)
+        function ASCIIMenuSelected(app, event)
             % 读取文件地址
             file = getappdata(app.UIFigure,'file');
             % 生成txt文件
@@ -245,7 +248,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Sketch
-        function SketchMenuSelected(app, ~)
+        function SketchMenuSelected(app, event)
             %% 目前使用预设threshold，日后可以添加slider
             
             white_threshold = 40;
@@ -282,7 +285,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Anime
-        function AnimeMenuSelected(app, ~)
+        function AnimeMenuSelected(app, event)
             img = getappdata(app.UIFigure,'img_src');
 %             img_src = uint8(double(img_src) .* 1.5);
             
@@ -315,7 +318,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Histogram
-        function HistogramMenuSelected(app, ~)
+        function HistogramMenuSelected(app, event)
             figure('Name','Histogram');
             
             im = getappdata(app.UIFigure,'img_src');
@@ -331,7 +334,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Crop
-        function CropMenuSelected(app, ~)
+        function CropMenuSelected(app, event)
             % 读入图片矩阵
             img_src = getappdata(app.UIFigure,'img_src');
             imshow(img_src,'Parent',app.Image_Axes);
@@ -357,7 +360,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Contrast
-        function ContrastMenuSelected(app, ~)
+        function ContrastMenuSelected(app, event)
             % 组件初始化
             set(app.Image_Axes,'Position',[135,1,702,573]);
             set(app.Contrast_Slider,'Visible','on');
@@ -378,7 +381,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Button pushed function: Contrast_Confirm
-        function Contrast_ConfirmButtonPushed(app, ~)
+        function Contrast_ConfirmButtonPushed(app, event)
             % 写入图片矩阵
             img = getappdata(app.UIFigure,'img_changed');
             setappdata(app.UIFigure,'img_src',img);
@@ -394,7 +397,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Button pushed function: Contrast_Cancel
-        function Contrast_CancelButtonPushed(app, ~)
+        function Contrast_CancelButtonPushed(app, event)
             % 显示原始图片矩阵
             img_src = getappdata(app.UIFigure,'img_src');
             imshow(img_src,'Parent',app.Image_Axes);
@@ -432,7 +435,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Value changed function: Contrast_Spinner
-        function Contrast_SpinnerValueChanged(app, ~)
+        function Contrast_SpinnerValueChanged(app, event)
             % 滑块与微调器数值同步
             Cont = app.Contrast_Spinner.Value;
             set(app.Contrast_Slider,'Value',Cont);
@@ -455,7 +458,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Value changed function: Contrast_ReverseButton
-        function Contrast_ReverseButtonValueChanged(app, ~)
+        function Contrast_ReverseButtonValueChanged(app, event)
             value = app.Contrast_ReverseButton.Value;
             
             % 调整ReverseButton的显示文字
@@ -474,7 +477,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         function Rotate_SliderValueChanging(app, event)
             % 滑块与微调器数值同步
             Angle = event.Value;
-            set(app.Rotate_Spinner,'Value',Angle);
+            set(app.Rotate_Spinner,'Value',round(Angle));
             % 建立UI内变量以多方控制滑块与微调器的数值
             setappdata(app.UIFigure,'RotateSliderValue',Angle);
             setappdata(app.UIFigure,'RotateSpinnerValue',Angle);
@@ -488,7 +491,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Value changed function: Rotate_Spinner
-        function Rotate_SpinnerValueChanged(app, ~)
+        function Rotate_SpinnerValueChanged(app, event)
             % 滑块与微调器数值同步
             Angle = app.Rotate_Spinner.Value;
             set(app.Rotate_Slider,'Value',Angle);
@@ -505,7 +508,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Button pushed function: Rotate_Confirm
-        function Rotate_ConfirmButtonPushed(app, ~)
+        function Rotate_ConfirmButtonPushed(app, event)
             % 写入图片矩阵
             img = getappdata(app.UIFigure,'img_changed');
             setappdata(app.UIFigure,'img_src',img);
@@ -523,7 +526,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Button pushed function: Rotate_Cancel
-        function Rotate_CancelButtonPushed(app, ~)
+        function Rotate_CancelButtonPushed(app, event)
             % 显示原始图片矩阵
             img_src = getappdata(app.UIFigure,'img_src');
             imshow(img_src,'Parent',app.Image_Axes);
@@ -540,7 +543,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Value changed function: Rotate_BboxButton
-        function Rotate_BboxButtonValueChanged(app, ~)
+        function Rotate_BboxButtonValueChanged(app, event)
             value = app.Rotate_BboxButton.Value;
             
             % 根据value改变BboxButton的显示字符
@@ -561,7 +564,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Menu selected function: Rotate
-        function RotateMenuSelected(app, ~)
+        function RotateMenuSelected(app, event)
             % 初始化组件
             set(app.Rotate_Slider,'Visible','on');
             set(app.Rotate_Spinner,'Visible','on');
@@ -586,7 +589,7 @@ classdef Hanzhi_Image_Editor < matlab.apps.AppBase
         end
 
         % Value changed function: Rotate_MethodDropDown
-        function Rotate_MethodDropDownValueChanged(app, ~)
+        function Rotate_MethodDropDownValueChanged(app, event)
             value = app.Rotate_MethodDropDown.Value;
             
             % 旋转图片并保存为临时矩阵
