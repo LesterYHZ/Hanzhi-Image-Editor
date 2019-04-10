@@ -1,16 +1,4 @@
 function str=img2txt(imfile,varargin)
-	%IMG2TXT Converts an image to ASCII text
-	%
-	%   img2txt(imfile) converts the image contained in the specified file
-	%                   using an ASCII character for every pixel in x-dimension
-	%   img2txt(imfile,stepx) converts the image contained in the specified file
-	%                   using an ASCII character for every stepx pixels in x-dimension
-	%
-	
-	%   Copyright (c) by Federico Forte
-	%   Date:     2004/04/08
-	%   Revision: 2004/04/27
-	
 	ramp='@@@@@@@######MMMBBHHHAAAA&&GGhh9933XXX222255SSSiiiissssrrrrrrr;;;;;;;;:::::::,,,,,,,........';
 	% the 'ramp' vector represents characters in order of intensity
 	im=imread(imfile);
